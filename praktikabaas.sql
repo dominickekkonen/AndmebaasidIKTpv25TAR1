@@ -152,11 +152,12 @@ END;
 EXEC LisaEmail;
 SELECT * FROM Firma;
 --Arvutab keskmine palk
+select * from praktikajuhendaja
 CREATE PROCEDURE KeskminePalkKalk
 AS
 BEGIN
-    SELECT AVG(palk) AS KeskminePalk
-    FROM praktikajuhendaja;
+SELECT praktikajuhendajaID, eesnimi, perekonnanimi, palk,
+AVG(palk) OVER() AS KeskminePalk FROM praktikajuhendaja;
 END;
 --kutse
 exec KeskminePalkKalk;
@@ -184,4 +185,5 @@ end
 --kutse
 DECLARE @DOB DATETIME = '2009-02-18'
 SELECT dbo.fnComputeAge(@DOB) AS Age
+
 
