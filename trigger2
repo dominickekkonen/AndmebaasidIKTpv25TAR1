@@ -1,0 +1,70 @@
+CREATE DATABASE TrigerKasutajad;
+USE TrigerKasutajad;
+--tellimuse tabeli lisamine
+CREATE TABLE tellimused(
+    tellimus_id int primary key identity(1,1),
+    klient_nimi varchar(20),
+    toode varchar(15),
+    kogus int,
+    hind int
+);
+--Logi tabeli lisamine
+CREATE TABLE logi(
+    logiID int primary key identity(1,1),
+    kuupaev date,
+    andmed varchar(30),
+    kasutaja varchar(25),
+    operation char(3)
+);
+--tellimuse tabeli täitmine
+INSERT INTO tellimused(klient_nimi, toode, kogus, hind)
+VALUES ('Mihkel', 'Klaviatuur', 1, 115);
+
+SELECT * FROM tellimused;
+--lisa trigger lisamine
+CREATE TRIGGER tellimusLisamine
+ON tellimused
+FOR INSERT
+AS
+BEGIN
+    INSERT INTO logi(kuupaev, andmed, kasutaja, operation)
+    SELECT GETDATE(), toode, klient_nimi, 'INS'
+    FROM inserted; -- 'inserted' captures the specific new row
+END;
+--kustutamise triggeri lisamine
+CREATE TRIGGER tellimusKustutamine
+ON tellimused
+FOR DELETE
+AS
+BEGIN
+    INSERT INTO logi(kuupaev, andmed, kasutaja, operation)
+    SELECT GETDATE(), toode, klient_nimi, 'DEL'
+    FROM deleted;
+END;
+
+--uuendamise triggeri lisamine
+CREATE TRIGGER tellimusUpdate
+ON tellimused
+FOR UPDATE
+AS
+BEGIN
+    INSERT INTO logi(kuupaev, andmed, kasutaja, operation)
+    SELECT GETDATE(), toode, klient_nimi, 'UPD'
+    FROM inserted; -- 'inserted' captures the new version of the row
+END;
+--kontroll lisa
+INSERT INTO tellimused(klient_nimi, toode, kogus, hind)
+VALUES ('Eduard', 'Printer', 2, 169);
+--kontroll update
+UPDATE tellimused SET kogus = 3 WHERE klient_nimi = 'Eduard';
+--kontroll kustutamine
+DELETE FROM tellimused WHERE klient_nimi = 'Daniil';
+SELECT * FROM tellimused;
+SELECT * FROM logi;
+--UUS ÜLESANNE
+CREATE TABLE asukoht(
+tellimus_id int,
+klient_nimi varchar(20) primary key,
+aadress varchar(30),
+postindex char(5),
+foreign key (tellimus_id) references tellimused(tellimus_id));
